@@ -1,11 +1,24 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const { initPostgreSQL, pgHelpers } = require('./database-pg');
 
-const dbPath = path.join(__dirname, '../../database.sqlite');
-const db = new sqlite3.Database(dbPath);
+// 환경에 따라 데이터베이스 선택
+const USE_POSTGRES = process.env.DB_TYPE === 'postgres' || process.env.DATABASE_URL;
+
+let db = null;
+
+if (!USE_POSTGRES) {
+  const dbPath = path.join(__dirname, '../../database.sqlite');
+  db = new sqlite3.Database(dbPath);
+}
 
 // 데이터베이스 초기화
-const initDatabase = () => {
+const initDatabase = async () => {
+  if (USE_POSTGRES) {
+    console.log('🐘 PostgreSQL 데이터베이스 초기화');
+    return await initPostgreSQL();
+  }
+  
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       // Users 테이블
@@ -135,9 +148,15 @@ const initDatabase = () => {
   });
 };
 
-// 데이터베이스 헬퍼 함수들
+// 데이터베이스 헬퍼 함수들 (PostgreSQL/SQLite 호환)
 const dbHelpers = {
-  get: (sql, params = []) => {
+  get: async (sql, params = []) => {
+    if (USE_POSTGRES) {
+      // PostgreSQL용 SQL 변환
+      const pgSQL = sql.replace(/\?/g, (_, index) => `$${params.findIndex((_, i) => i === index) + 1}`);
+      return await pgHelpers.get(pgSQL, params);
+    }
+    
     return new Promise((resolve, reject) => {
       db.get(sql, params, (err, row) => {
         if (err) reject(err);
@@ -146,7 +165,16 @@ const dbHelpers = {
     });
   },
 
-  all: (sql, params = []) => {
+  all: async (sql, params = []) => {
+    if (USE_POSTGRES) {
+      // PostgreSQL용 SQL 변환
+      const pgSQL = sql.replace(/\?/g, (match, offset) => {
+        const paramIndex = (sql.substring(0, offset).match(/\?/g) || []).length + 1;
+        return `$${paramIndex}`;
+      });
+      return await pgHelpers.all(pgSQL, params);
+    }
+    
     return new Promise((resolve, reject) => {
       db.all(sql, params, (err, rows) => {
         if (err) reject(err);
@@ -155,7 +183,17 @@ const dbHelpers = {
     });
   },
 
-  run: (sql, params = []) => {
+  run: async (sql, params = []) => {
+    if (USE_POSTGRES) {
+      // PostgreSQL용 SQL 변환
+      const pgSQL = sql.replace(/\?/g, (match, offset) => {
+        const paramIndex = (sql.substring(0, offset).match(/\?/g) || []).length + 1;
+        return `$${paramIndex}`;
+      });
+      const result = await pgHelpers.run(pgSQL, params);
+      return { id: null, changes: result.rowCount };
+    }
+    
     return new Promise((resolve, reject) => {
       db.run(sql, params, function(err) {
         if (err) reject(err);

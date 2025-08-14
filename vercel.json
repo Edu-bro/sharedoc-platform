@@ -6,22 +6,34 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "build"
+        "distDir": "build",
+        "buildCommand": "npm run build"
       }
     },
     {
-      "src": "backend/src/server.js",
-      "use": "@vercel/node"
+      "src": "backend/src/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/src/server.js"
+      "dest": "backend/src/index.js"
     },
     {
       "src": "/uploads/(.*)",
-      "dest": "backend/src/server.js"
+      "dest": "backend/src/index.js"
+    },
+    {
+      "src": "/share/(.*)",
+      "dest": "frontend/build/index.html"
+    },
+    {
+      "src": "/review/(.*)",
+      "dest": "frontend/build/index.html"
     },
     {
       "src": "/(.*)",
@@ -32,12 +44,22 @@
     "NODE_ENV": "production",
     "JWT_SECRET": "@jwt_secret",
     "AI_PROVIDER": "mock",
-    "AI_ENABLED": "true"
+    "AI_ENABLED": "true",
+    "CORS_ORIGIN": "https://*.vercel.app",
+    "DB_TYPE": "@db_type",
+    "DATABASE_URL": "@database_url",
+    "DB_SSL": "true"
   },
   "functions": {
-    "backend/src/server.js": {
-      "maxDuration": 30
+    "backend/src/index.js": {
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
-  "outputDirectory": "frontend/build"
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
 }

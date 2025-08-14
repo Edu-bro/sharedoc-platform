@@ -61,9 +61,12 @@ app.use('*', (req, res) => {
   res.status(404).json({ success: false, error: '요청하신 리소스를 찾을 수 없습니다.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 서버가 포트 ${PORT}에서 실행중입니다.`);
-  console.log(`📱 Health check: http://localhost:${PORT}/api/health`);
-});
+// Vercel 환경이 아닌 경우에만 서버 시작
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🚀 서버가 포트 ${PORT}에서 실행중입니다.`);
+    console.log(`📱 Health check: http://localhost:${PORT}/api/health`);
+  });
+}
 
 module.exports = app;
