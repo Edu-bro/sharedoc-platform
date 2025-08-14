@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "sharedoc-platform",
   "builds": [
     {
       "src": "frontend/package.json",
@@ -9,57 +8,12 @@
         "distDir": "build",
         "buildCommand": "npm run build"
       }
-    },
-    {
-      "src": "backend/src/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/src/index.js"
-    },
-    {
-      "src": "/uploads/(.*)",
-      "dest": "backend/src/index.js"
-    },
-    {
-      "src": "/share/(.*)",
-      "dest": "frontend/build/index.html"
-    },
-    {
-      "src": "/review/(.*)",
-      "dest": "frontend/build/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/build/index.html"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "JWT_SECRET": "@jwt_secret",
-    "AI_PROVIDER": "mock",
-    "AI_ENABLED": "true",
-    "CORS_ORIGIN": "https://*.vercel.app",
-    "DB_TYPE": "@db_type",
-    "DATABASE_URL": "@database_url",
-    "DB_SSL": "true"
-  },
-  "functions": {
-    "backend/src/index.js": {
-      "maxDuration": 30,
-      "memory": 1024
-    }
-  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "source": "/((?!api|_next|static).*)",
+      "destination": "/frontend/build/index.html"
     }
   ]
 }
