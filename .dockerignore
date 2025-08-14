@@ -1,0 +1,71 @@
+# Node modules
+node_modules/
+*/node_modules/
+
+# 개발 파일
+.env
+.env.local
+.env.development
+
+# 빌드 결과물
+*/build/
+*/dist/
+
+# 로그
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 런타임 데이터
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# 의존성 디렉토리
+.pnp
+.pnp.js
+
+# 테스팅
+/coverage
+
+# 프로덕션 빌드
+/build
+
+# 기타
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 개발 도구
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 데이터베이스 파일
+*.db
+*.sqlite
+
+# 업로드된 파일
+uploads/
+data/
+
+# 스크립트
+start-dev.sh
